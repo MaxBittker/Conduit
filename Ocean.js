@@ -92,6 +92,7 @@ function Tile(x, y, color, Orientation){
          this.y = y;
          this.Orientation = Orientation;
          this.color = color;
+         this.froze = false
      
       }; 
 
@@ -177,9 +178,12 @@ function doot(x, y, color){
           if(this.y<=0)
             this.y = 0;
           }
-          else{
+
+          else if(!cTile.froze&& (((Xopen[cTile.Orientation]*3) == (-1*delta[0])) || ((Yopen[cTile.Orientation]*3) == (-1*delta[1])))){
           	dir =1// Math.floor((PP[0]%25)/5) + Math.floor((PP[1]%25)/5)
           	cTile.Orientation = cTile.Orientation+dir%4;
+          //	cTile.froze = true;
+          	cTile.color *=  3 ;
  			}
           }
         };
@@ -201,7 +205,7 @@ var Tiles = new Array(20);
 	    for (var y = 0; y < 20; y++) { 
 
     
-      var singleTile = new Tile(x,y, 1111111111, Math.round((Math.random() * 100))%4);
+      var singleTile = new Tile(x,y, 1111111111+(255*x*y), Math.round((Math.random() * 100))%4);
 	//(Math.random()*0xFFFFFF<<0)
 
       Tiles[x][y]= singleTile;
