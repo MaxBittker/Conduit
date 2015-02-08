@@ -1,3 +1,4 @@
+  var husl = HUSL;
 
 Ocean = (function() {
   // Constant properties 
@@ -87,11 +88,11 @@ function onKeyDown(event) {
 
  
 
-function Tile(x, y, color, Orientation){
+function Tile(x, y, h,s,l, Orientation){
          this.x = x;
          this.y = y;
          this.Orientation = Orientation;
-         this.color = color;
+         this.color = husl.p.toRGB(h, s, l);
          this.froze = false
      
       }; 
@@ -160,10 +161,13 @@ function doot(x, y, color){
 		if(this.y==500)
 			delta[1] = -Math.abs(delta[1]);
 
-		PP =[this.x+delta[0],this.y+delta[1]];
-
-		var cTile = Tiles[Math.floor(PP[0]/25)][Math.floor(PP[1]/25)]; 
-        if(0 == cTile.sprite[Math.floor((PP[0]%25)/5) + 5* Math.floor((PP[1]%25)/5)])
+		PP = [this.x+delta[0],this.y+delta[1]]; //player pos
+		TP = [Math.floor(PP[0]/25),Math.floor(PP[1]/25)];//tile pos  ------------V sprite pos
+		SP = [Math.floor((PP[0]%25)/5),Math.floor((PP[1]%25)/5),(Math.floor((PP[0]%25)/5) + 5*Math.floor((PP[1]%25)/5))];
+		
+		var cTile = Tiles[TP[0]][TP[1]]; 
+        
+        if(0 == cTile.sprite[SP[2]])
        		{
        
           this.x += delta[0];
@@ -179,12 +183,28 @@ function doot(x, y, color){
             this.y = 0;
           }
 
-          else if(!cTile.froze&& (((Xopen[cTile.Orientation]*3) == (-1*delta[0])) || ((Yopen[cTile.Orientation]*3) == (-1*delta[1])))){
-          	dir =1// Math.floor((PP[0]%25)/5) + Math.floor((PP[1]%25)/5)
-          	cTile.Orientation = cTile.Orientation+dir%4;
-          //	cTile.froze = true;
-          	cTile.color *=  3 ;
+          else if(!cTile.froze&& (((Xopen[cTile.Orientation]*3) == (-1*delta[0])) )){
+          	dir =(Yopen[cTile.Orientation]*3== -1*delta[0] )? 1:-1;
+          	cTile.Orientation = (cTile.Orientation+dir+4)%4;
+	         	cTile.froze = true;
+          	cTile.color  = husl.p.toRGB(160, 30, 70);
+          	delta[0] = 0;
  			}
+ 			else if(!cTile.froze&& (((Yopen[cTile.Orientation]*3) == (-1*delta[1])) )){
+          	dir =(Xopen[cTile.Orientation]*3== -1*delta[1] )? -1:1;
+          	cTile.Orientation = (cTile.Orientation+dir+4)%4;
+          		delta[1] = 0;
+          	cTile.froze = true;
+          	cTile.color  = husl.p.toRGB(160, 30, 70);
+          //	cTile.color  = husl.p.fromHex(hex)  30*257 ;
+ 			}
+
+    //       else if(!cTile.froze&& (((Xopen[cTile.Orientation]*3) == (-1*delta[0])) || ((Yopen[cTile.Orientation]*3) == (-1*delta[1])))){
+    //       	dir =1// Math.floor((PP[0]%25)/5) + Math.floor((PP[1]%25)/5)
+    //       	cTile.Orientation = cTile.Orientation+dir%4;
+    //       //	cTile.froze = true;
+    //       //	cTile.color  = husl.p.fromHex(hex)  30*257 ;
+ 			// }
           }
         };
 
@@ -192,7 +212,7 @@ function doot(x, y, color){
 
 
   function init(number) {
-
+basecolor = Math.random()*360;
 
 var Tiles = new Array(20);
   for (var i = 0; i < 20; i++) {
@@ -205,7 +225,7 @@ var Tiles = new Array(20);
 	    for (var y = 0; y < 20; y++) { 
 
     
-      var singleTile = new Tile(x,y, 1111111111+(255*x*y), Math.round((Math.random() * 100))%4);
+      var singleTile = new Tile(x,y, (basecolor)-(y*x*.07),300-(Math.log(x+2*y+2)*9),40-(Math.log(x+2*y+2)*9), Math.round((Math.random() * 100))%4);
 	//(Math.random()*0xFFFFFF<<0)
 
       Tiles[x][y]= singleTile;
@@ -218,7 +238,7 @@ var Tiles = new Array(20);
   function Ocean(equation, canvas) {
     this.Tiles    = init(); // spawn new fish
     this.canvas    = canvas;
-    this.doot 	   = new doot(250,250,99999999);
+    this.doot 	   = new doot(45,45,99999999);
     this.scale     = 5//canvas.getAttribute('width') / width;
     console.log(this.scale);
     this.context   = canvas.getContext('2d');
@@ -255,10 +275,10 @@ var Tiles = new Array(20);
     drawTile: function(Tile, Tiles) {
        var x = Tile.x;
        var y = Tile.y;
-       var color = Tile.color;
-       var R = (color & 0xff0000) >>> 16;
-       var G = (color & 0x00ff00) >>> 8;
-       var B = (color & 0x0000ff) >>> 0;
+       var color = Tile.color 
+       var R =Math.floor(color[0]*255);// (color & 0xff0000) >>> 16;
+       var G =Math.floor(color[1]*255); //(color & 0x00ff00) >>> 8;
+       var B =Math.floor(color[2]*255);// (color & 0x0000ff) >>> 0;
 
        var Orientation = Tile.Orientation;
        Tile.sprite = TileSprite[Tile.Orientation];
@@ -357,8 +377,7 @@ var Tiles = new Array(20);
 
      for (var x = 0; x < 20; x++) { 
 	    for (var y = 0; y < 20; y++) { 
-	    	 this.Tiles[x][y].Orientation =(this.Tiles[x][y].Orientation+// 0);
-	    	 	(Math.floor(Math.random()*Math.random()*Math.random()*Math.random()*Math.random()*2 )))%4; //
+	    	 this.Tiles[x][y].Orientation =(this.Tiles[x][y].Orientation+(Math.floor(Math.random()*1.00005)))%4; //
       this.drawTile( this.Tiles[x][y], this.Tiles);
       }
  		 }
