@@ -1,11 +1,12 @@
   var husl = HUSL;
+var click = new Audio('click.mp3');
 
 Ocean = (function() {
   // Constant properties 
   var width = 100;
   var height = 100;
 
-  var interval = 1000 / (30 /* fps */);
+  var interval = 1000 / (60 /* fps */);
   var frame = 1;
       
   var TileSprite=[[1,0,0,0,0, //(yes, this is what you think it is)
@@ -94,8 +95,20 @@ function Tile(x, y, h,s,l, Orientation){
          this.Orientation = Orientation;
          this.color = husl.p.toRGB(h, s, l);
          this.froze = false
+        this.sprite = TileSprite[this.Orientation];
      
       }; 
+
+      Tile.prototype = {
+
+   shift: function(dir) {
+      this.Orientation = ((this.Orientation+dir+4)%4);
+      this.sprite = TileSprite[this.Orientation];
+      click.play()
+    }
+
+};
+
 
     
 function doot(x, y, color){
@@ -113,7 +126,7 @@ function doot(x, y, color){
 		                0,1,1,1,1,1,1,1,0,
 		                0,0,1,1,0,1,1,0,0,
 		                0,0,0,1,1,1,0,0,0,
-		                0,0,0,1,0,0,1,0,0],
+		                0,0,0,0,0,0,0,0,0],
 
 		               [0,0,0,1,1,1,0,0,0,
 		                0,0,1,1,1,1,1,0,0,
@@ -123,7 +136,7 @@ function doot(x, y, color){
 		                1,1,1,1,1,1,1,1,1,
 		                0,1,1,0,0,0,1,1,0,
 		                0,0,1,1,1,1,1,0,0,
-		                0,0,1,0,0,1,0,0,0]];
+		                0,0,0,1,1,1,0,0,0]];
    
          this.color = color;
 
@@ -141,8 +154,8 @@ function doot(x, y, color){
           var delta = [0,0];
 
 
-          if(keyLeft||keyRight||keyUp||keyDown){
-	          this.fa++;
+          //if(keyLeft||keyRight||keyUp||keyDown){
+	        {  this.fa++;
 	          if(this.fa>7)
 	          	{this.fa = 0;
 	          	this.frame = ((this.frame+1)%2);}
@@ -183,21 +196,33 @@ function doot(x, y, color){
             this.y = 0;
           }
 
-          else if(!cTile.froze&& (((Xopen[cTile.Orientation]*3) == (-1*delta[0])) )){
-          	dir =(Yopen[cTile.Orientation]*3== -1*delta[0] )? 1:-1;
-          	cTile.Orientation = (cTile.Orientation+dir+4)%4;
-	         	cTile.froze = true;
-          	cTile.color  = husl.p.toRGB(160, 30, 70);
-          	delta[0] = 0;
- 			}
- 			else if(!cTile.froze&& (((Yopen[cTile.Orientation]*3) == (-1*delta[1])) )){
-          	dir =(Xopen[cTile.Orientation]*3== -1*delta[1] )? -1:1;
-          	cTile.Orientation = (cTile.Orientation+dir+4)%4;
-          		delta[1] = 0;
-          	cTile.froze = true;
-          	cTile.color  = husl.p.toRGB(160, 30, 70);
-          //	cTile.color  = husl.p.fromHex(hex)  30*257 ;
- 			}
+          	else if(!cTile.froze){
+          		//cTile.color  = husl.p.toRGB(160, 30, 70);
+          		//cTile.froze = true;
+          		
+          		for(var n =0; n<5;n++){
+          			if(0!=cTile.sprite[SP[2]] )
+          			cTile.shift(1);
+          			}
+          	}
+
+    //       else if(!cTile.froze&& (((Xopen[cTile.Orientation]*3) == (-1*delta[0])) )){
+    //       	dir =(Yopen[cTile.Orientation]*3== -1*delta[0] )? 1:-1;
+    //       	cTile.Orientation = (cTile.Orientation+dir+4)%4;
+	         	
+	   //      delta[0] = 0;
+	         	
+    //       	//cTile.color  = husl.p.toRGB(160, 30, 70);
+    //       	//cTile.froze = true;
+ 			// }
+ 			// else if(!cTile.froze&& (((Yopen[cTile.Orientation]*3) == (-1*delta[1])) )){
+    //       	dir =(Xopen[cTile.Orientation]*3== -1*delta[1] )? -1:1;
+    //       	cTile.Orientation = (cTile.Orientation+dir+4)%4;
+    //       		delta[1] = 0;
+    //       	//cTile.froze = true;
+    //       	//cTile.color  = husl.p.toRGB(160, 30, 70);
+    //       //	cTile.color  = husl.p.fromHex(hex)  30*257 ;
+ 			// }
 
     //       else if(!cTile.froze&& (((Xopen[cTile.Orientation]*3) == (-1*delta[0])) || ((Yopen[cTile.Orientation]*3) == (-1*delta[1])))){
     //       	dir =1// Math.floor((PP[0]%25)/5) + Math.floor((PP[1]%25)/5)
@@ -225,12 +250,13 @@ var Tiles = new Array(20);
 	    for (var y = 0; y < 20; y++) { 
 
     
-      var singleTile = new Tile(x,y, (basecolor)-(y*x*.07),300-(Math.log(x+2*y+2)*9),40-(Math.log(x+2*y+2)*9), Math.round((Math.random() * 100))%4);
+      var singleTile = new Tile(x,y, (basecolor)-(y*x*.07),300-(Math.log(x+2*y+2)*9),40-(Math.log(x+2*y+2)*9),Math.round((Math.random() *100))%4 );
 	//(Math.random()*0xFFFFFF<<0)
 
       Tiles[x][y]= singleTile;
       }
   }
+  
 
     return Tiles;
     }
@@ -245,6 +271,14 @@ var Tiles = new Array(20);
     this.imageData = this.context.createImageData(width * this.scale, height * this.scale);
     this.then      = +Date.now();
     this.paused    = false;
+
+ for (var i = 0; i < 4; i++) { 
+    for (var x = 0; x < 20; x++) { 
+	    for (var y = 0; y < 20; y++) { 
+    if(this.CheckAttached(this.Tiles[x][y],this.Tiles) !=2)
+		    this.Tiles[x][y].shift( (Math.random()>.5)?-1:1) ;
+      }
+  }}
   }
 
 
@@ -272,6 +306,23 @@ var Tiles = new Array(20);
       }
     },
 
+    CheckAttached: function(Tile, Tiles) {
+    var factor = 2;
+
+ 	   Xface = Xopen[Tile.Orientation];
+  	   Yface = Yopen[Tile.Orientation];
+       newX = Tile.x+ Xface;
+       newY = Tile.y+ Yface;
+
+       if(((newX<20)&&(newX>-1) && (Xopen[Tiles[newX][Tile.y].Orientation] == Xface)))
+       		factor--;
+       
+       if((newY<20)&&(newY>-1) && (Yopen[Tiles[Tile.x][newY].Orientation] == Yface))  
+       		factor--;
+	 
+		return (factor);
+    },
+
     drawTile: function(Tile, Tiles) {
        var x = Tile.x;
        var y = Tile.y;
@@ -281,17 +332,12 @@ var Tiles = new Array(20);
        var B =Math.floor(color[2]*255);// (color & 0x0000ff) >>> 0;
 
        var Orientation = Tile.Orientation;
-       Tile.sprite = TileSprite[Tile.Orientation];
+      
       // console.log(Orientation);
        var sprite = Tile.sprite;
        var sps  = Math.sqrt(sprite.length)-1;
 
-       Xface = Xopen[Orientation];
-       Yface = Yopen[Orientation];
-       newX = x+ Xface;
-       newY = y+ Yface;
-       if(  ( ((newX<20)&&(newX>-1) && (Xopen[Tiles[newX][y].Orientation] == Xface)) 
-       	  &&  ((newY<20)&&(newY>-1) && (Yopen[Tiles[x][newY].Orientation] == Yface)) )   )
+      if(this.CheckAttached(Tile,Tiles)==0)
        		sprite = [1,1,1,1,1, //(yes, this is what you think it is)
                 	  1,1,1,1,1,
                	  	  1,1,1,1,1,
@@ -344,7 +390,7 @@ var Tiles = new Array(20);
        var sps  = Math.sqrt(sprite.length)-1;
 
        
- 
+
 
        for (var sx = 0; sx < 9; sx++) {
             for (var sy = 0; sy < 9; sy++) {
@@ -377,7 +423,13 @@ var Tiles = new Array(20);
 
      for (var x = 0; x < 20; x++) { 
 	    for (var y = 0; y < 20; y++) { 
-	    	 this.Tiles[x][y].Orientation =(this.Tiles[x][y].Orientation+(Math.floor(Math.random()*1.00005)))%4; //
+
+		//if(this.CheckAttached(this.Tiles[x][y],this.Tiles) ==0)
+	   // 	 this.Tiles[x][y].Orientation =(this.Tiles[x][y].Orientation+1) %4; 
+	   //	else
+	   	//this.Tiles[x][y].shift((Math.floor(Math.random()*1.00005))%4); //
+
+
       this.drawTile( this.Tiles[x][y], this.Tiles);
       }
  		 }
