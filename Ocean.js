@@ -117,10 +117,14 @@ function Tile(x, y, h,s,l, Orientation){
       this.sprite = TileSprite[this.Orientation];
      // click.play();
     },
-    newO: function(O) {
-    	var click = new Audio('click.mp3');
+    newO: function(O,which) {
+    	if(which)
+    		var click = new Audio('boom.mp3');
+    	else
+			var click = new Audio('bap.mp3');
 
-    	if(((O+4)%4)!=this.Orientation)
+
+    	//if(((O+4)%4)!=this.Orientation)
       	click.play();
       this.Orientation = ((O+4)%4);
       this.sprite = TileSprite[this.Orientation];
@@ -207,7 +211,7 @@ function doot(x, y, h,s,l){
 
 		var nTile = Tiles[this.x+delta[0]][this.y+delta[1]];
 
-		nTile.newO(cTile.Orientation+(((this.facing*-2)+1)*(1+(keyRight==this.facing))));
+		nTile.newO(cTile.Orientation+(((this.facing*-2)+1)*(1+(keyRight==this.facing))),keyRight);
 
 
        		
@@ -242,7 +246,7 @@ var Tiles = new Array(20);
 	    for (var y = 0; y < 20; y++) { 
 
     
-      var singleTile = new Tile(x,y, (basecolor)-(y*x*.07),300-(Math.log(x+2*y+2)*9),40-(Math.log(x+2*y+2)*9),Math.round((Math.random() *100))%4 );
+      var singleTile = new Tile(x,y, (basecolor)-(y*x*.19),300-(Math.log(x+2*y+2)*15),40-(Math.log(x+2*y+2)*9),Math.round((Math.random() *100))%4 );
 	//(Math.random()*0xFFFFFF<<0)
 
       Tiles[x][y]= singleTile;
@@ -256,7 +260,7 @@ var Tiles = new Array(20);
   function Ocean(equation, canvas) {
     this.Tiles    = init(); // spawn new fish
     this.canvas    = canvas;
-    this.doot 	   = new doot(6,6,30,50,30);
+    this.doot 	   = new doot(6,6,30,177,30);
     this.scale     = 5//canvas.getAttribute('width') / width;
     console.log(this.scale);
     this.context   = canvas.getContext('2d');
@@ -427,8 +431,8 @@ var Tiles = new Array(20);
     drawFrame: function() {
     //console.log(this.frame);
       this.context.fillRect(0,0,500,500);
-    //  offset =79+ Math.round)( (Math.sin(frame/3) *2)  + (Math.random()*2)) ; 
-      this.context.fillStyle = 'black'//#0310'+offset.toString(16);
+      // offset =5+ Math.round( (Math.sin(frame/3) *2)  + (Math.random()*60)) ; 
+      this.context.fillStyle = husl.p.toHex(40,60, (frame/30));//t'#0010'+offset.toString(16);
       this.context.fill();
       // this.context.scale(5,5);
      this.imageData = this.context.getImageData(0, 0, 500, 500);
