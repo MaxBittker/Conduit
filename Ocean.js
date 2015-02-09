@@ -432,7 +432,7 @@ var Tiles = new Array(20);
     //console.log(this.frame);
       this.context.fillRect(0,0,500,500);
       // offset =5+ Math.round( (Math.sin(frame/3) *2)  + (Math.random()*60)) ; 
-      this.context.fillStyle = husl.p.toHex(40,60, (frame/30));//t'#0010'+offset.toString(16);
+      this.context.fillStyle = husl.p.toHex(40,60, 2);////t'#0010'+offset.toString(16);
       this.context.fill();
       // this.context.scale(5,5);
      this.imageData = this.context.getImageData(0, 0, 500, 500);
