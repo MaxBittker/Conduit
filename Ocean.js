@@ -1,5 +1,5 @@
   var husl = HUSL;
-var click = new Audio('click.mp3');
+//var click = new Audio('click.mp3');
 
 var Ocean = (function() {
   // Constant properties 
@@ -112,11 +112,14 @@ function Tile(x, y, h,s,l, Orientation){
       Tile.prototype = {
 
    shift: function(dir) {
+   
       this.Orientation = ((this.Orientation+dir+4)%4);
       this.sprite = TileSprite[this.Orientation];
-      click.play()
+     // click.play();
     },
     newO: function(O) {
+    	var click = new Audio('click.mp3');
+
     	if(((O+4)%4)!=this.Orientation)
       	click.play();
       this.Orientation = ((O+4)%4);
