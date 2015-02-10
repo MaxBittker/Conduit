@@ -221,7 +221,7 @@ function doot(x, y, h,s,l){
     		}
     	else if ((-1*delta[0])==nTile.Xopen() ||  (-1*delta[1])==nTile.Yopen()   )
     		{
-    		var ting = keyDown ? (new Audio ('click.mp3')): (new Audio('ting.mp3'));
+    		var ting = keyDown ? (new Audio ('ting2.mp3')): (new Audio('ting.mp3'));
     		ting.play();
 
     		if(((4+(cTile.Orientation-nTile.Orientation))%2)==0)
