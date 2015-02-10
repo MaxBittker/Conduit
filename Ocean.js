@@ -43,9 +43,9 @@ var Ocean = (function() {
  // window.addEventListener("keyup", onKeyUp, false);
 
   var keyLeft = false 
-    , keyRight = false;
-    // , keyDown = false
-    // , keyRight = true;
+    , keyRight = false
+    , keyDown = false
+    , keyUp = true;
     // , keyUpE = false  
     // , keyLeftE = false
     // , keyDownE = false
@@ -57,27 +57,27 @@ var Ocean = (function() {
         case 68: //d
           keyRight = Boolean;
           break;
-        // case 83: //s
-        //   keyDown = Boolean;
-        //   break;
+        case 83: //s
+          keyDown = Boolean;
+          break;
         case 65: //a
           keyLeft = Boolean;
           break;
-        // case 87: //w
-        //   keyUp = Boolean;
-        //   break;
+        case 87: //w
+          keyUp = Boolean;
+          break;
         case 39: //up
           keyRight = Boolean;
           break;
-        // case 40: //down
-        //   keyDown = Boolean;
-        //   break;
+        case 40: //down
+          keyDown = Boolean;
+          break;
          case 37: //left
           keyLeft = Boolean;
           break;
-        // case 38: //up
-        //   keyUp = Boolean;
-        //   break;
+        case 38: //up
+          keyUp = Boolean;
+          break;
       }
     }
 
@@ -195,10 +195,10 @@ function doot(x, y, h,s,l){
 
 		var delta = [0,0];
 
-	       var cTile = Tiles[this.x][this.y]; 
+	    var cTile = Tiles[this.x][this.y]; 
 
 		delta = [cTile.Xopen(),cTile.Yopen()]; 
-			delta[((cTile.Orientation+this.facing)%2)] = 0;
+			delta[((cTile.Orientation+this.facing+keyDown)%2)] = 0;
 
 		if(this.x+delta[0]>19)
             delta[0] = 0;
@@ -210,15 +210,26 @@ function doot(x, y, h,s,l){
  			 delta[1] = 0;
 
 		var nTile = Tiles[this.x+delta[0]][this.y+delta[1]];
-
-		nTile.newO(cTile.Orientation+(((this.facing*-2)+1)*(1+(keyRight==this.facing))),keyRight);
-
-
+		if(keyRight || keyLeft )
+			{
+			nTile.newO(cTile.Orientation+(((this.facing*-2)+1)*(1+(keyRight==this.facing))),keyRight);
        		
-   		if(keyRight)
-    		this.facing = 0; //cw
-    	else	
-    		this.facing = 1; //ccw
+   			if(keyRight)
+    			this.facing = 0; //cw
+    		else	
+    			this.facing = 1; //ccw
+    		}
+    	else if ((-1*delta[0])==nTile.Xopen() ||  (-1*delta[1])==nTile.Yopen()   )
+    		{
+    		var ting = keyDown ? (new Audio ('click.mp3')): (new Audio('ting.mp3'));
+    		ting.play();
+
+    		if(((4+(cTile.Orientation-nTile.Orientation))%2)==0)
+    			this.facing = !this.facing;
+
+    		}
+    	else
+    		return;
 
           this.x += delta[0];
           this.y += delta[1];
@@ -298,15 +309,15 @@ var Tiles = new Array(20);
     //  var now = +Date.now();
     //  var delta = now - this.then;
 
-      if ( keyLeft||keyRight ){
+      if ( keyLeft || keyRight || keyUp || keyDown){
       //  this.then = now;
       
         this.drawFrame();
         frame++;
 
- 	 	//keyUp    = false;
+ 	 	keyUp    = false;
      	keyLeft  = false;
-    	//keyDown  = false;
+    	keyDown  = false;
     	keyRight = false;
 
       }
