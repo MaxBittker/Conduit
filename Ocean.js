@@ -156,25 +156,7 @@ function doot(x, y, h,s,l){
          this.facing = 0;//0 =CW 1 = CCW 
          this.frame = 0;
          this.fa=0;
-         // this.sprite= [[0,0,0,0,0,0,0,0,0,
-		       //          0,0,0,0,0,0,0,0,0,
-		       //          0,0,0,1,1,1,0,0,0,
-		       //          0,0,1,1,0,1,1,0,0,
-		       //          0,0,1,0,0,0,1,0,0,
-		       //          0,0,1,1,0,1,1,0,0,
-		       //          0,0,0,1,1,1,0,0,0,
-		       //          0,0,0,0,0,0,0,0,0,
-		       //          0,0,0,0,0,0,0,0,0],
-
-		       //         [0,0,0,0,0,0,0,0,0,
-		       //          0,0,0,0,0,0,0,0,0,
-		       //          0,0,0,0,0,0,0,0,0,
-		       //          0,0,0,0,1,0,0,0,0,
-		       //          0,0,0,1,1,1,0,0,0,
-		       //          0,0,0,0,1,0,0,0,0,
-		       //          0,0,0,0,0,0,0,0,0,
-		       //          0,0,0,0,0,0,0,0,0,
-		       //          0,0,0,0,0,0,0,0,0]];
+      
    
   
 
@@ -200,17 +182,30 @@ function doot(x, y, h,s,l){
 		delta = [cTile.Xopen(),cTile.Yopen()]; 
 			delta[((cTile.Orientation+this.facing+keyDown)%2)] = 0;
 
-		if(this.x+delta[0]>19)
-            delta[0] = 0;
+		
         if(this.x+delta[0]<0)
             delta[0] = 0;
-        if(this.y+delta[1]>19)
-            delta[1] = 0;
         if(this.y+delta[1]<0)
+ 			 delta[1] = 0;
+ 		if(this.x+delta[0]>19  && this.y+delta[1]>16)
+            {
+            this.x = 0;
+            this.y = (20-this.y);
+            return(true);  	
+            }	
+		if(this.y+delta[1]>19  && this.x+delta[0]>16)
+            {
+            this.x = (20-this.x);
+            this.y = 0;
+            return(true);  	
+            }	
+        if(this.x+delta[0]>19)
+            delta[0] = 0;
+        if(this.y+delta[1]>19)
  			 delta[1] = 0;
 
 		var nTile = Tiles[this.x+delta[0]][this.y+delta[1]];
-		if(keyRight || keyLeft )
+		if((keyRight || keyLeft)&& !keyDown )
 			{
 			nTile.newO(cTile.Orientation+(((this.facing*-2)+1)*(1+(keyRight==this.facing))),keyRight);
        		
@@ -222,6 +217,7 @@ function doot(x, y, h,s,l){
     	else if ((-1*delta[0])==nTile.Xopen() ||  (-1*delta[1])==nTile.Yopen()   )
     		{
     		var ting = keyDown ? (new Audio ('ting2.mp3')): (new Audio('ting.mp3'));
+
     		ting.play();
 
     		if(((4+(cTile.Orientation-nTile.Orientation))%2)==0)
@@ -236,20 +232,20 @@ function doot(x, y, h,s,l){
 
        
 
-      
+      		return(false);
           }
         };
 
       
 
 
-  function init(number) {
-basecolor = Math.random()*360;
+  function init(basecolor) {
+
 
 var Tiles = new Array(20);
-  for (var i = 0; i < 20; i++) {
+  for (var i = 0; i < 20; i++) 
     Tiles[i] = new Array(20);
-  }
+  
  
 
 
@@ -269,9 +265,10 @@ var Tiles = new Array(20);
     }
 
   function Ocean(equation, canvas) {
-    this.Tiles    = init(); // spawn new fish
+  	this.startingColor = Math.random()*360
+    this.Tiles     = init(this.startingColor); // spawn new fish
     this.canvas    = canvas;
-    this.doot 	   = new doot(6,6,30,177,30);
+    this.doot 	   = new doot(1,1,30,177,30);
     this.scale     = 5//canvas.getAttribute('width') / width;
     console.log(this.scale);
     this.context   = canvas.getContext('2d');
@@ -449,8 +446,11 @@ var Tiles = new Array(20);
      this.imageData = this.context.getImageData(0, 0, 500, 500);
 
       // if(frame>1)
-    this.doot.toot(this.Tiles);
-
+    if(this.doot.toot(this.Tiles))
+		{this.startingColor-=40;
+		this.Tiles = init(this.startingColor);
+			}
+     
      for (var x = 0; x < 20; x++) { 
 	    for (var y = 0; y < 20; y++) { 
 
