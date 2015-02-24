@@ -9,8 +9,8 @@ var Ocean = (function() {
   //var interval = 1000 / (60 /* fps */);
   var frame = 1;
 
-   var Xopen = [ 1, 1, -1,-1];
-  var Yopen	= [ -1, 1, 1,-1];	
+  //  var Xopen = [ 1, 1, -1,-1];
+  // var Yopen	= [ -1, 1, 1,-1];	
       
   var TileSprite=[[1,0,3,0,0, //(yes, this is what you think it is)
                    1,0,2,2,0,
@@ -104,7 +104,8 @@ function Tile(x, y, h,s,l, Orientation){
          this.y = y;
          this.Orientation = Orientation;
          this.color = husl.p.toRGB(h, s, l);
-         this.froze = false
+         this.froze = false;
+         this.onPath  = false;
         this.sprite = TileSprite[this.Orientation];
      
       }; 
@@ -137,7 +138,32 @@ function Tile(x, y, h,s,l, Orientation){
     Yopen: function(){
      var open = [ -1, 1, 1,-1];	
      return(open[this.Orientation]);
-   }
+   },
+   nextTile: function(Tiles, XorY) {
+        
+      var PathSet = [0,0];  
+
+      //var delta = [Tile.Xopen(),Tile.Yopen()]; 
+      
+
+     Xface = this.Xopen();
+     Yface = this.Yopen();
+
+      newX = this.x+ Xface;
+      newY = this.y+ Yface;
+
+       if(((newX<20)&&(newX>-1) && (Tiles[newX][this.y].Xopen() != Xface))) //TODO
+          PathSet[0] = Tiles[newX][this.y];
+       
+       if((newY<20)&&(newY>-1) && (Tiles[this.x][newY].Yopen() != Yface))  
+          PathSet[1] = Tiles[this.x][newY];
+
+   
+    return (XorY ? PathSet[0] : PathSet[1] );
+    }
+
+   
+  
  
 
 };
@@ -169,7 +195,7 @@ function doot(x, y, h,s,l){
         // ///push
         //   },
          
-        toot: function(Tiles){
+  toot: function(Tiles){
          
 	         this.fa = (this.fa+1)%4;
 	          if(this.fa=3)
@@ -177,35 +203,50 @@ function doot(x, y, h,s,l){
 
 		var delta = [0,0];
 
-	    var cTile = Tiles[this.x][this.y]; 
+    var cTile = Tiles[this.x][this.y]; 
 
 		delta = [cTile.Xopen(),cTile.Yopen()]; 
-			delta[((cTile.Orientation+this.facing+keyDown)%2)] = 0;
+		delta[((cTile.Orientation+this.facing+keyDown)%2)] = 0;
 
-		
-        if(this.x+delta[0]<0)
-            delta[0] = 0;
-        if(this.y+delta[1]<0)
- 			 delta[1] = 0;
- 		if(this.x+delta[0]>19  && this.y+delta[1]>16)
-            {
-            this.x = 0;
-            this.y = (20-this.y);
-            return(true);  	
-            }	
-		if(this.y+delta[1]>19  && this.x+delta[0]>16)
-            {
-            this.x = (20-this.x);
-            this.y = 0;
-            return(true);  	
-            }	
-        if(this.x+delta[0]>19)
-            delta[0] = 0;
-        if(this.y+delta[1]>19)
- 			 delta[1] = 0;
+
+    if(this.x+delta[0]<0)
+        delta[0] = 0;
+    if(this.y+delta[1]<0)
+		      delta[1] = 0;
+    	if(this.x+delta[0]>19  && this.y+delta[1]>16)
+        {
+        this.x = 0;
+        this.y = (20-this.y);
+        return(true);  	
+        }	
+    if(this.y+delta[1]>19  && this.x+delta[0]>16)
+        {
+        this.x = (20-this.x);
+        this.y = 0;
+        return(true);  	
+        }	
+    if(this.x+delta[0]>19)
+        delta[0] = 0;
+    if(this.y+delta[1]>19)
+		    delta[1] = 0;
 
 		var nTile = Tiles[this.x+delta[0]][this.y+delta[1]];
-		if((keyRight || keyLeft)&& !keyDown )
+	  
+     // if(!(Ocean.nextTile(cTile,delta[1]==0) === nTile))
+     //  console.log("badmove");
+
+
+      // if(!cTile.nextTile(Tiles,((cTile.Orientation+this.facing+keyDown)%2)))
+       // console.log(Math.random());
+
+       if(nTile.onPath == true && !(keyDown || keyUp)  )// && cTile.nextTile(Tiles,((cTile.Orientation+this.facing+1)%2)) )
+          {
+            console.log(cTile.nextTile(Tiles,((cTile.Orientation+this.facing+1)%2)));
+           return (false); 
+          }
+
+
+  	if((keyRight || keyLeft)&& !keyDown )
 			{
 			nTile.newO(cTile.Orientation+(((this.facing*-2)+1)*(1+(keyRight==this.facing))),keyRight);
        		
@@ -266,7 +307,7 @@ var Tiles = new Array(20);
 
   function Ocean(equation, canvas) {
   	this.startingColor = Math.random()*360
-    this.Tiles     = init(this.startingColor); // spawn new fish
+    this.Tiles     = init(this.startingColor); 
     this.canvas    = canvas;
     this.doot 	   = new doot(1,1,30,177,30);
     this.scale     = 5//canvas.getAttribute('width') / width;
@@ -312,7 +353,7 @@ var Tiles = new Array(20);
         this.drawFrame();
         frame++;
 
- 	 	keyUp    = false;
+ 	 	  keyUp    = false;
      	keyLeft  = false;
     	keyDown  = false;
     	keyRight = false;
@@ -345,6 +386,13 @@ var Tiles = new Array(20);
        var isDoot = (this.doot.x == x && this.doot.y == y);
 
        var color = Tile.color ;
+       
+       // if(Tile.onPath)
+       // {
+       // color =  husl.p.toRGB(55, 33, 55);
+       // Tile.onPath = false;
+       // }
+
        var R =Math.floor(color[0]*255);// (color & 0xff0000) >>> 16;
        var G =Math.floor(color[1]*255); //(color & 0x00ff00) >>> 8;
        var B =Math.floor(color[2]*255);// (color & 0x0000ff) >>> 0;
@@ -353,13 +401,11 @@ var Tiles = new Array(20);
        {
 
   	   var Dcolor = this.doot.color; 
-       var DR =Math.floor(Dcolor[0]*255);// (color & 0xff0000) >>> 16;
-       var DG =Math.floor(Dcolor[1]*255); //(color & 0x00ff00) >>> 8;
-       var DB =Math.floor(Dcolor[2]*255);// (color & 0x0000ff) >>> 0;
+       var DR =Math.floor(Dcolor[0]*255);
+       var DG =Math.floor(Dcolor[1]*255);
+       var DB =Math.floor(Dcolor[2]*255);
 
        }
-
-
 
        var Orientation = Tile.Orientation;
       
@@ -368,7 +414,7 @@ var Tiles = new Array(20);
        var sps  = Math.sqrt(sprite.length)-1;
 
       if(this.CheckAttached(Tile,Tiles)==0)
-       		sprite = [1,1,1,1,1, //(yes, this is what you think it is)
+       		sprite = [1,1,1,1,1, 
                 	  1,1,1,1,1,
                	  	  1,1,1,1,1,
               	      1,1,1,1,1,
@@ -379,9 +425,9 @@ var Tiles = new Array(20);
             for (var sy = 0; sy < 25; sy++) {
             	var type = sprite[(Math.floor(sx/5)+(5*Math.floor(sy/5)))];
             	var C  = 0;
+              var i = ((((y*5) * this.scale + (sy-1)) * width * this.scale) + ((x*5) * this.scale + (sx-1))) * 4 ;
               if( 1== type)  
               {
-              var i = ((((y*5) * this.scale + (sy-1)) * width * this.scale) + ((x*5) * this.scale + (sx-1))) * 4 ;
               this.imageData.data[i]   = R%255;
               this.imageData.data[i+1] = G%255;
               this.imageData.data[i+2] = B%255;
@@ -392,15 +438,24 @@ var Tiles = new Array(20);
               		if((this.doot.facing+3) == type)
               		  C = 50;
               		  	
-              var i = ((((y*5) * this.scale + (sy-1)) * width * this.scale) + ((x*5) * this.scale + (sx-1))) * 4 ;
               this.imageData.data[i]   = (DR+C)%255;
               this.imageData.data[i+1] = (DG+C)%255;
               this.imageData.data[i+2] = (DB-C)%255;
               this.imageData.data[i+3] = 255;
               } 
+              else if(Tile.onPath && type<1)
+                {                       
+              this.imageData.data[i]   = (R-(Tile.onPath*2))%255;
+              this.imageData.data[i+1] = (G-(Tile.onPath*2))%255;
+              this.imageData.data[i+2] = (B-(Tile.onPath*2))%255;
+              this.imageData.data[i+3] = 255;
+              }   
+
 
             }
           }
+
+                 
 
     },
      drawDoot: function(doot, Tiles) {
@@ -431,9 +486,61 @@ var Tiles = new Array(20);
             }
           }
 
+      
+    },
+
+    
+
+  tallyPath: function(doot) {
+
+       var x = doot.x;
+       var y = doot.y;
+       var Tile = this.Tiles[x][y];
+       var PD = 1;
+       Tile.onPath = 1;
+
+
+
+       var Tunnel = [];
+
+       // var slack = 200;
+       // var = false;
+
+    // for(var XYtoggle  = 0; XYtoggle<2; XYtoggle++){
+    var XYtoggle = false;     
+        cTile = Tile.nextTile(this.Tiles,XYtoggle);
+            
+       while(cTile!=0 && !cTile.onPath)
+       {
+       Tunnel.push(cTile);
+        cTile.onPath = (PD++);
+        XYtoggle = !XYtoggle;
+        cTile = cTile.nextTile(this.Tiles,XYtoggle); 
+       }
+
+        XYtoggle = true;    
+        cTile = Tile.nextTile(this.Tiles,XYtoggle);
+        PD = 1;
+
+       while(cTile!=0  &&  (cTile.x != x || cTile.y != y) )
+       {
+       Tunnel.push(cTile);
+    
+      if(cTile.onPath == 0 || cTile.onPath > PD)
+        cTile.onPath = (PD++);
+        XYtoggle = !XYtoggle;
+        cTile = cTile.nextTile(this.Tiles,XYtoggle);
+       }
+
+    // }
+       // if(slack <4)
+        // console.log(slack);
+      return Tunnel;
+
     },
 
    
+      
    
 
     drawFrame: function() {
@@ -447,23 +554,32 @@ var Tiles = new Array(20);
 
       // if(frame>1)
     if(this.doot.toot(this.Tiles))
-		{this.startingColor-=40;
+		{//draw new level
+    this.startingColor-=40;
 		this.Tiles = init(this.startingColor);
-			}
+		}
+  
+    for (var x = 0; x < 20; x++) { 
+    for (var y = 0; y < 20; y++) {    
+  this.Tiles[x][y].onPath = 0;
+    }
+  }
+
+this.tallyPath(this.doot);
      
      for (var x = 0; x < 20; x++) { 
 	    for (var y = 0; y < 20; y++) { 
-
-		//if(this.CheckAttached(this.Tiles[x][y],this.Tiles) ==0)
-	   // 	 this.Tiles[x][y].Orientation =(this.Tiles[x][y].Orientation+1) %4; 
-	   //	else
-	   	//this.Tiles[x][y].shift((Math.floor(Math.random()*1.00005))%4); //
+		// if(this.CheckAttached(this.Tiles[x][y],this.Tiles) ==0)
+	 //   	 this.Tiles[x][y].shift( (Math.random()>.5)?-1:1 ) ;
+	 //   	else
+	   	 // this.Tiles[x][y].shift((Math.floor(Math.random()*1.001))%4); //
        
-
       this.drawTile( this.Tiles[x][y], this.Tiles);
       }
  		 }
  		 
+
+
  //this.drawDoot(this.doot, this.Tiles);
 
       // document.getElementById('score').innerHTML = 'Catch Rate:   WASD: ' +this.boats[0].rate.toFixed(0)+'    ArrowKeys: ' +this.boats[1].rate.toFixed(0)+'     -    Population: '+this.Fishes.length ;
@@ -483,6 +599,7 @@ var Tiles = new Array(20);
         window.mozRequestAnimationFrame ||
         window.oRequestAnimationFrame ||
         window.msRequestAnimationFrame ||
+        
         function(callback) {
           window.setTimeout(callback, 2000);
         };
