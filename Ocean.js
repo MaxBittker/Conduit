@@ -1,4 +1,29 @@
   var husl = HUSL;
+   
+  var ting = new Howl({
+	  urls: ['ting.mp3'],
+	  autoplay: false,
+	  loop: false,
+	  volume: 0.8,
+	});
+  var ting2 = new Howl({
+	  urls: ['ting2.mp3'],
+	  autoplay: false,
+	  loop: false,
+	  volume: 0.8,
+	});
+  var boom = new Howl({
+	  urls: ['boom.mp3'],
+	  autoplay: false,
+	  loop: false,
+	  volume: 0.8,
+	});
+  var bap = new Howl({
+	  urls: ['bap.mp3'],
+	  autoplay: false,
+	  loop: false,
+	  volume: 0.8,
+	});
 //var click = new Audio('click.mp3');
 
 var Ocean = (function() {
@@ -120,13 +145,13 @@ function Tile(x, y, h,s,l, Orientation){
     },
     newO: function(O,which) {
     	if(which)
-    		var click = new Audio('boom.mp3');
+    		boom.play();//var click = new Audio('boom.mp3');
     	else
-			var click = new Audio('bap.mp3');
+			bap.play();//var click = new Audio('bap.mp3');
+//      	click.play();
 
 
     	//if(((O+4)%4)!=this.Orientation)
-      	click.play();
       this.Orientation = ((O+4)%4);
       this.sprite = TileSprite[this.Orientation];
 
@@ -209,26 +234,27 @@ function doot(x, y, h,s,l){
 		delta[((cTile.Orientation+this.facing+keyDown)%2)] = 0;
 
 
+	if(this.x+delta[0]>19  && this.y+delta[1]>16)
+	        {
+		        this.x = 0;
+		        this.y = (20-this.y);
+		        return(true);  	
+	        }	
+    	if(this.y+delta[1]>19  && this.x+delta[0]>16)
+        	{
+	        	this.x = (20-this.x);
+	        	this.y = 0;
+	        	return(true);  	
+        	}	
+
     if(this.x+delta[0]<0)
-        delta[0] = 0;
+        return(false)//delta[0] = 0;
     if(this.y+delta[1]<0)
-		      delta[1] = 0;
-    	if(this.x+delta[0]>19  && this.y+delta[1]>16)
-        {
-        this.x = 0;
-        this.y = (20-this.y);
-        return(true);  	
-        }	
-    if(this.y+delta[1]>19  && this.x+delta[0]>16)
-        {
-        this.x = (20-this.x);
-        this.y = 0;
-        return(true);  	
-        }	
+	    return(false)//delta[1] = 0;
     if(this.x+delta[0]>19)
-        delta[0] = 0;
+        return(false)//delta[0] = 0;
     if(this.y+delta[1]>19)
-		    delta[1] = 0;
+	    return(false)//delta[1] = 0;
 
 		var nTile = Tiles[this.x+delta[0]][this.y+delta[1]];
 	  
@@ -256,9 +282,7 @@ function doot(x, y, h,s,l){
     		}
     	else if ((-1*delta[0])==nTile.Xopen() ||  (-1*delta[1])==nTile.Yopen()   )
     		{
-    		var ting = keyDown ? (new Audio ('ting2.mp3')): (new Audio('ting.mp3'));
-
-    		ting.play();
+    		keyDown ? ting.play() : ting2.play();
 
     		if(((4+(cTile.Orientation-nTile.Orientation))%2)==0)
     			this.facing = !this.facing;
@@ -308,7 +332,8 @@ var Tiles = new Array(20);
   	this.startingColor = Math.random()*360
     this.Tiles     = init(this.startingColor); 
     this.canvas    = canvas;
-    this.doot 	   = new doot(1,1,30,177,30);
+    this.doot 	   = new doot(1,1,this.startingColor+180,177,30);
+    this.PathLength = 0;
     this.scale     = 5//canvas.getAttribute('width') / width;
     console.log(this.scale);
     this.context   = canvas.getContext('2d');
@@ -395,8 +420,9 @@ var Tiles = new Array(20);
        var R =Math.floor(color[0]*255);// (color & 0xff0000) >>> 16;
        var G =Math.floor(color[1]*255); //(color & 0x00ff00) >>> 8;
        var B =Math.floor(color[2]*255);// (color & 0x0000ff) >>> 0;
-
-       var Pcolor = husl.p.toRGB(this.startingColor ,200, Math.floor(40*Math.sin(Tile.onPath/15)));
+       
+       // var Pcolor =  husl.p.toRGB((this.startingColor)-(y*x*.19),300-(Math.log(x+2*y+2)*15),40-(Math.log(x+2*y+2)*9)- Tile.onPath*2);
+       var Pcolor = husl.p.toRGB(this.startingColor + Tile.onPath*3 ,Math.min(80+ this.PathLength*5,240), 20);
        // if(Tile.onPath)
        // console.log(180 + Math.floor(100*Math.sin(Tile.onPath/5)));
        var PR =Math.floor(Pcolor[0]*255);
@@ -405,12 +431,10 @@ var Tiles = new Array(20);
 
        if(isDoot)
        {
-
   	   var Dcolor = this.doot.color; 
        var DR =Math.floor(Dcolor[0]*255);
        var DG =Math.floor(Dcolor[1]*255);
        var DB =Math.floor(Dcolor[2]*255);
-
        }
 
 
@@ -444,8 +468,8 @@ var Tiles = new Array(20);
               else if(isDoot && 1 < type) 
               	{ 
               		if((this.doot.facing+3) == type)
-              		  C = 50;
-              		  	
+              		  C = 100;
+              			
               this.imageData.data[i]   = (DR+C)%255;
               this.imageData.data[i+1] = (DG+C)%255;
               this.imageData.data[i+2] = (DB-C)%255;
@@ -548,6 +572,7 @@ var Tiles = new Array(20);
     // }
        // if(slack <4)
         // console.log(slack);
+       this.PathLength = Tunnel.length;
       return Tunnel;
 
     },
@@ -568,7 +593,8 @@ var Tiles = new Array(20);
       // if(frame>1)
     if(this.doot.toot(this.Tiles))
 		{//draw new level
-    this.startingColor-=40;
+    	this.startingColor-=40;
+    	this.doot.color =  husl.p.toRGB(180+this.startingColor, 177, 30);
 		this.Tiles = init(this.startingColor);
 		}
   
