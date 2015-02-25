@@ -238,12 +238,11 @@ function doot(x, y, h,s,l){
 
       // if(!cTile.nextTile(Tiles,((cTile.Orientation+this.facing+keyDown)%2)))
        // console.log(Math.random());
-
-       if(nTile.onPath == true && !(keyDown || keyUp)  )// && cTile.nextTile(Tiles,((cTile.Orientation+this.facing+1)%2)) )
-          {
-            console.log(cTile.nextTile(Tiles,((cTile.Orientation+this.facing+1)%2)));
-           return (false); 
-          }
+       // if(nTile.onPath == true && !(keyDown || keyUp)   &&  nTile===cTile.nextTile(Tiles,((cTile.Orientation+this.facing)%2)) )
+       //    {
+       //      console.log(cTile.nextTile(Tiles,((cTile.Orientation+this.facing+1)%2)));
+       //     return (false); 
+       //    }
 
 
   	if((keyRight || keyLeft)&& !keyDown )
@@ -397,6 +396,13 @@ var Tiles = new Array(20);
        var G =Math.floor(color[1]*255); //(color & 0x00ff00) >>> 8;
        var B =Math.floor(color[2]*255);// (color & 0x0000ff) >>> 0;
 
+       var Pcolor = husl.p.toRGB(this.startingColor ,200, Math.floor(40*Math.sin(Tile.onPath/15)));
+       // if(Tile.onPath)
+       // console.log(180 + Math.floor(100*Math.sin(Tile.onPath/5)));
+       var PR =Math.floor(Pcolor[0]*255);
+       var PG =Math.floor(Pcolor[1]*255);
+       var PB =Math.floor(Pcolor[2]*255);
+
        if(isDoot)
        {
 
@@ -407,6 +413,8 @@ var Tiles = new Array(20);
 
        }
 
+
+
        var Orientation = Tile.Orientation;
       
       // console.log(Orientation);
@@ -416,9 +424,9 @@ var Tiles = new Array(20);
       if(this.CheckAttached(Tile,Tiles)==0)
        		sprite = [1,1,1,1,1, 
                 	  1,1,1,1,1,
-               	  	  1,1,1,1,1,
-              	      1,1,1,1,1,
-              	      1,1,1,1,1];
+               	  	1,1,1,1,1,
+              	    1,1,1,1,1,
+              	    1,1,1,1,1];
 
 
        for (var sx = 0; sx < 25; sx++) {
@@ -445,10 +453,15 @@ var Tiles = new Array(20);
               } 
               else if(Tile.onPath && type<1)
                 {                       
-              this.imageData.data[i]   = (R-(Tile.onPath*2))%255;
-              this.imageData.data[i+1] = (G-(Tile.onPath*2))%255;
-              this.imageData.data[i+2] = (B-(Tile.onPath*2))%255;
+              this.imageData.data[i]   = (PR)%255;
+              this.imageData.data[i+1] = (PG)%255;
+              this.imageData.data[i+2] = (PB)%255;
               this.imageData.data[i+3] = 255;
+
+              //     this.imageData.data[i]   = (R-(Tile.onPath*2))%255;
+              // this.imageData.data[i+1] = (G-(Tile.onPath*2))%255;
+              // this.imageData.data[i+2] = (B-(Tile.onPath*2))%255;
+              // this.imageData.data[i+3] = 255;
               }   
 
 
