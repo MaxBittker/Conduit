@@ -317,7 +317,7 @@ var Tiles = new Array(20);
 	    for (var y = 0; y < 20; y++) { 
 
     
-      var singleTile = new Tile(x,y, (basecolor)-(y*x*.19),300-(Math.log(x+2*y+2)*15),40-(Math.log(x+2*y+2)*9),Math.round((Math.random() *100))%4 );
+      var singleTile = new Tile(x,y, (basecolor)-((y+x)*3),300-(Math.log(x+2*y+2)*15),40-(Math.log(x+2*y+2)*9),Math.round((Math.random() *100))%4 );
 	//(Math.random()*0xFFFFFF<<0)
 
       Tiles[x][y]= singleTile;
@@ -593,7 +593,7 @@ var Tiles = new Array(20);
       // if(frame>1)
     if(this.doot.toot(this.Tiles))
 		{//draw new level
-    	this.startingColor-=40;
+    	this.startingColor-=60;
     	this.doot.color =  husl.p.toRGB(180+this.startingColor, 177, 30);
 		this.Tiles = init(this.startingColor);
 		}
